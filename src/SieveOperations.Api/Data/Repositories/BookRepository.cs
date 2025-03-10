@@ -5,35 +5,27 @@ using SieveOperations.Api.Models;
 
 namespace SieveOperations.Api.Data.Repositories;
 
-public class BookRepository : IBookRepository
+public class BookRepository(ApplicationDbContext context, ISieveProcessor sieveProcessor)
+    : IBookRepository
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ISieveProcessor _sieveProcessor;
-
-    public BookRepository(ApplicationDbContext context, ISieveProcessor sieveProcessor)
-    {
-        _context = context;
-        _sieveProcessor = sieveProcessor;
-    }
-
     public async Task<IEnumerable<Book>> GetAllAsync(SieveModel sieveModel)
     {
-        var query = _context.Books
+        var query = context.Books
             .Include(b => b.Publisher)
             .AsQueryable();
 
-        return await _sieveProcessor
+        return await sieveProcessor
             .Apply(sieveModel, query)
             .ToListAsync();
     }
 
     public async Task<int> GetCountAsync(SieveModel sieveModel, bool applyFiltering = true)
     {
-        var query = _context.Books.AsQueryable();
+        var query = context.Books.AsQueryable();
         
         if (applyFiltering)
         {
-            return await _sieveProcessor
+            return await sieveProcessor
                 .Apply(sieveModel, query, applyPagination: false, applySorting: false)
                 .CountAsync();
         }
@@ -43,14 +35,14 @@ public class BookRepository : IBookRepository
 
     public async Task<Book?> GetByIdAsync(int id)
     {
-        return await _context.Books
+        return await context.Books
             .Include(b => b.Publisher)
             .FirstOrDefaultAsync(b => b.Id == id);
     }
 
     public async Task<IEnumerable<Book>> GetAdvancedAsync(SieveModel sieveModel, decimal? minPrice = null, decimal? maxPrice = null)
     {
-        var query = _context.Books
+        var query = context.Books
             .Include(b => b.Publisher)
             .AsQueryable();
 
@@ -59,7 +51,7 @@ public class BookRepository : IBookRepository
             query = query.Where(b => b.Price >= minPrice && b.Price <= maxPrice);
         }
 
-        return await _sieveProcessor
+        return await sieveProcessor
             .Apply(sieveModel, query)
             .ToListAsync();
     }
