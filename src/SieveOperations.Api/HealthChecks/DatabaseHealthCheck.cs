@@ -3,21 +3,14 @@ using SieveOperations.Api.Data;
 
 namespace SieveOperations.Api.HealthChecks;
 
-public class DatabaseHealthCheck : IHealthCheck
+public class DatabaseHealthCheck(ApplicationDbContext dbContext) : IHealthCheck
 {
-    private readonly ApplicationDbContext _dbContext;
-
-    public DatabaseHealthCheck(ApplicationDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         try
         {
             // Basic test to see if the database is responding
-            var canConnect = await _dbContext.Database.CanConnectAsync(cancellationToken);
+            var canConnect = await dbContext.Database.CanConnectAsync(cancellationToken);
             
             if (canConnect)
             {
