@@ -51,16 +51,6 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
             .CanSort()
             .HasName("publisher.country");
 
-        //// Custom filter for age of book
-        //mapper.Property<Book>(b => b.PublishedDate)
-        //    .HasName("yearsOld")
-        //    .CanFilter((value, books) =>
-        //    {
-        //        var years = int.Parse(value);
-        //        var cutoffDate = DateTime.Now.AddYears(-years);
-        //        return books.Where(b => b.PublishedDate < cutoffDate);
-        //    });
-
         return mapper;
     }
 }
